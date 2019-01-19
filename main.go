@@ -8,21 +8,26 @@ import (
 	"strings"
 )
 
-func handleConnection(c net.Conn, num int) {
+var shard Shard
+
+func handleConnection(c net.Conn) {
 	fmt.Printf("Serving %s\n", c.RemoteAddr().String())
 	for {
+		// TODO extract room or create a new one
 		netData, err := bufio.NewReader(c).ReadString('\n')
 		if err != nil {
 			fmt.Println(err)
-			return
+			continue
 		}
 
-		temp := strings.TrimSpace(string(netData))
-		if temp == "STOP" {
+		sig := strings.TrimSpace(string(netData))
+		if sig == "STOP" {
 			break
+		} else if sig == "NEW_ROOM" {
+			shard.NewRoom()
 		}
 
-		_, _ = c.Write([]byte("you're " + string(num)))
+		_, _ = c.Write([]byte(netData))
 	}
 	_ = c.Close()
 }
@@ -44,15 +49,13 @@ func main() {
 	defer fmt.Println("server is stopped")
 	defer l.Close()
 
-	connections := 0
-
+	shard = NewShard()
 	for {
 		c, err := l.Accept()
 		if err != nil {
 			fmt.Println(err)
-			return
+			continue
 		}
-		connections++
-		go handleConnection(c, connections)
+		go handleConnection(c)
 	}
 }
