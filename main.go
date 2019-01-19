@@ -1,61 +1,36 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"net"
-	"os"
-	"strings"
+	"github.com/gorilla/websocket"
+	"log"
+	"net/http"
 )
 
-var shard Shard
-
-func handleConnection(c net.Conn) {
-	fmt.Printf("Serving %s\n", c.RemoteAddr().String())
-	for {
-		// TODO extract room or create a new one
-		netData, err := bufio.NewReader(c).ReadString('\n')
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
-
-		sig := strings.TrimSpace(string(netData))
-		if sig == "STOP" {
-			break
-		} else if sig == "NEW_ROOM" {
-			shard.NewRoom()
-		}
-
-		_, _ = c.Write([]byte(netData))
-	}
-	_ = c.Close()
-}
+var upgrader = websocket.Upgrader{}
 
 func main() {
 	fmt.Println("server is starting")
-	arguments := os.Args
-	if len(arguments) == 1 {
-		fmt.Println("Please provide a port number!")
-		return
-	}
-
-	PORT := ":" + arguments[1]
-	l, err := net.Listen("tcp4", PORT)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
 	defer fmt.Println("server is stopped")
-	defer l.Close()
+	http.HandleFunc("/", serve)
+	_ = http.ListenAndServe(":8080", nil)
+	_, _ = fmt.Scanln()
+}
 
-	shard = NewShard()
+func serve(w http.ResponseWriter, r *http.Request) {
+	ws, _ := upgrader.Upgrade(w, r, nil)
 	for {
-		c, err := l.Accept()
+		_, message, err := ws.ReadMessage()
 		if err != nil {
-			fmt.Println(err)
-			continue
+			log.Println("read:", err)
+			break
 		}
-		go handleConnection(c)
+		log.Printf("recv: %s", message)
+		err = ws.WriteMessage(websocket.TextMessage, message)
+		if err != nil {
+			log.Println(err)
+			break
+		}
 	}
+	defer ws.Close()
 }
