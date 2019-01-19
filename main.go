@@ -14,6 +14,7 @@ var upgrader = websocket.Upgrader{}
 var rooms map[string]Room
 
 func main() {
+	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 	fmt.Println("server is starting")
 	rooms = make(map[string]Room, 0)
 	rand.Seed(time.Now().UnixNano())
@@ -26,6 +27,8 @@ func main() {
 
 func serve(w http.ResponseWriter, r *http.Request) {
 	ws, _ := upgrader.Upgrade(w, r, nil)
+	defer ws.Close()
+
 	for {
 		_, message, err := ws.ReadMessage()
 		if err != nil {
@@ -50,5 +53,4 @@ func serve(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
-	defer ws.Close()
 }
