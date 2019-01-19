@@ -3,22 +3,12 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"math/rand"
 	"net"
 	"os"
-	"strconv"
 	"strings"
-	"time"
 )
 
-const MIN = 1
-const MAX = 100
-
-func random() int {
-	return rand.Intn(MAX-MIN) + MIN
-}
-
-func handleConnection(c net.Conn) {
+func handleConnection(c net.Conn, num int) {
 	fmt.Printf("Serving %s\n", c.RemoteAddr().String())
 	for {
 		netData, err := bufio.NewReader(c).ReadString('\n')
@@ -32,13 +22,13 @@ func handleConnection(c net.Conn) {
 			break
 		}
 
-		result := strconv.Itoa(random()) + "\n"
-		c.Write([]byte(string(result)))
+		_, _ = c.Write([]byte("you're " + string(num)))
 	}
-	c.Close()
+	_ = c.Close()
 }
 
 func main() {
+	fmt.Println("server is starting")
 	arguments := os.Args
 	if len(arguments) == 1 {
 		fmt.Println("Please provide a port number!")
@@ -51,8 +41,10 @@ func main() {
 		fmt.Println(err)
 		return
 	}
+	defer fmt.Println("server is stopped")
 	defer l.Close()
-	rand.Seed(time.Now().Unix())
+
+	connections := 0
 
 	for {
 		c, err := l.Accept()
@@ -60,6 +52,7 @@ func main() {
 			fmt.Println(err)
 			return
 		}
-		go handleConnection(c)
+		connections++
+		go handleConnection(c, connections)
 	}
 }
