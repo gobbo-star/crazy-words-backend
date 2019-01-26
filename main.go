@@ -4,26 +4,28 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"log"
-	"math/rand"
 	"net/http"
-	"strings"
 	"time"
 )
 
 var upgrader = websocket.Upgrader{}
-var word string
 var runeSet []rune
+var room Room
 
+//var participants
 func main() {
-	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+	startServer()
+}
+
+func startServer() {
 	fmt.Println("server is starting")
 	defer fmt.Println("server is stopped")
-	rand.Seed(time.Now().UnixNano())
-	genWordsPool()
-	word = newWord(randLen())
+	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+	room = NewRoom(15 * time.Millisecond)
+	go room.start()
+
 	http.HandleFunc("/", serve)
 	_ = http.ListenAndServe(":8080", nil)
-	_, _ = fmt.Scanln()
 }
 
 func serve(w http.ResponseWriter, r *http.Request) {
@@ -39,41 +41,23 @@ func serve(w http.ResponseWriter, r *http.Request) {
 		var resp []byte
 		switch string(message) {
 		case "HINT":
-			resp = []byte(word)
+			//resp = []byte(word)
 		case "CONNECT":
-			resp = []byte(fmt.Sprintf("new: %v", len(word)))
+			//resp = []byte(fmt.Sprintf("new: %v", len(word)))
 		case "EXIT":
 			break
 		default:
-			if word == string(message) {
-				word = newWord(randLen())
-				resp = []byte(fmt.Sprintf("%v is right. new: %v", string(message), len(word)))
-			} else {
-				resp = []byte("wrong")
-			}
+			//if word == string(message) {
+			//	word = newWord(randLen())
+			//	resp = []byte(fmt.Sprintf("%v is right. new: %v", string(message), len(word)))
+			//} else {
+			//	resp = []byte("wrong")
+			//}
 		}
 		err = ws.WriteMessage(websocket.TextMessage, resp)
 		if err != nil {
 			log.Println(err)
 			break
 		}
-	}
-}
-
-func randLen() int {
-	return rand.Intn(5) + 3
-}
-
-func newWord(wLen int) string {
-	w := strings.Builder{}
-	for ; wLen > 0; wLen-- {
-		w.WriteRune(runeSet[rand.Intn(len(runeSet))])
-	}
-	return w.String()
-}
-
-func genWordsPool() {
-	for r := 'a'; r <= 'z'; r++ {
-		runeSet = append(runeSet, r)
 	}
 }
