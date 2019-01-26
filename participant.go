@@ -3,8 +3,9 @@ package main
 import "github.com/gorilla/websocket"
 
 type Participant struct {
-	ws   *websocket.Conn
-	name string
+	ws    *websocket.Conn
+	Name  string `json:"Name"`
+	Score uint   `json:"Score"`
 }
 
 func (p *Participant) Notify(bytes []byte) {
@@ -13,6 +14,6 @@ func (p *Participant) Notify(bytes []byte) {
 }
 
 func NewParticipant(ws *websocket.Conn, name string) *Participant {
-	p := Participant{ws, name}
+	p := Participant{ws, name, 0}
 	return &p
 }
