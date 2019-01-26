@@ -9,23 +9,24 @@ import (
 
 type Room struct {
 	ticker *time.Ticker
-	w      string
+	W      string `json:"w"`
 }
 
-func (r Room) start() {
+func (r *Room) start() {
 	for t := range r.ticker.C {
-		r.w = newWord(randLen())
+		r.W = newWord(randLen())
 		fmt.Println(t)
+		fmt.Println(r.W)
 	}
 }
 
-func NewRoom(refreshRate time.Duration) Room {
+func NewRoom(refreshRate time.Duration) *Room {
 	r := Room{}
 	rand.Seed(time.Now().UnixNano())
 	genWordsPool()
-	r.w = newWord(randLen())
+	r.W = newWord(randLen())
 	r.ticker = time.NewTicker(refreshRate)
-	return r
+	return &r
 }
 
 func randLen() int {
