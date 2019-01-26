@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"math/rand"
-	"strings"
 	"time"
 )
 
@@ -58,22 +57,4 @@ func NewRoom(refreshRate time.Duration) *Room {
 	r.participants = make([]*Participant, 0)
 	r.ticker = time.NewTicker(refreshRate)
 	return &r
-}
-
-func randLen() int {
-	return rand.Intn(5) + 3
-}
-
-func newWord(wLen int) string {
-	w := strings.Builder{}
-	for ; wLen > 0; wLen-- {
-		w.WriteRune(runeSet[rand.Intn(len(runeSet))])
-	}
-	return w.String()
-}
-
-func genWordsPool() {
-	for r := 'a'; r <= 'z'; r++ {
-		runeSet = append(runeSet, r)
-	}
 }

@@ -12,7 +12,7 @@ func (p *Participant) Notify(bytes []byte) {
 		bytes)
 }
 
-func NewParticipant(ws *websocket.Conn) *Participant {
-	p := Participant{ws, "TODO name"}
+func NewParticipant(ws *websocket.Conn, name string) *Participant {
+	p := Participant{ws, name}
 	return &p
 }
