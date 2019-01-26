@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
 	"log"
@@ -14,8 +13,6 @@ var refresher *time.Ticker
 var runeSet []rune
 var room *Room
 
-var participants []*websocket.Conn
-
 func main() {
 	startServer()
 }
@@ -24,19 +21,11 @@ func startServer() {
 	fmt.Println("server is starting")
 	defer fmt.Println("server is stopped")
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
-	participants = make([]*websocket.Conn, 0)
+
 	refresher = time.NewTicker(1 * time.Second)
 	go func() {
 		for range refresher.C {
-			for i := 0; i < len(participants); i++ {
-				p := participants[i]
-				rs, err := json.Marshal(room)
-				if err != nil {
-					fmt.Println(err)
-				}
-				_ = p.WriteMessage(websocket.TextMessage,
-					rs)
-			}
+			room.notify()
 		}
 	}()
 	room = NewRoom(15 * time.Second)
@@ -47,7 +36,8 @@ func startServer() {
 
 func serve(w http.ResponseWriter, r *http.Request) {
 	ws, _ := upgrader.Upgrade(w, r, nil)
-	participants = append(participants, ws)
+	room.join(ws)
+	defer room.quit(ws)
 	defer ws.Close()
 
 	for {
