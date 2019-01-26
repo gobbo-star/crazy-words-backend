@@ -1,7 +1,7 @@
 FROM golang:latest as builder
+RUN go get github.com/gorilla/websocket
 RUN mkdir /app
 ADD . /app/
-RUN go get github.com/gorilla/websocket
 WORKDIR /app
 RUN go build -o main .
 
