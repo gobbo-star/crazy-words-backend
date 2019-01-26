@@ -12,7 +12,7 @@ func NewRiddle(r *Room) *Riddle {
 	riddle.P = make([]string, len(r.participants))
 	for i := 0; i < len(r.participants); i++ {
 		p := r.participants[i]
-		riddle.P = append(riddle.P, p.RemoteAddr().String())
+		riddle.P = append(riddle.P, p.name)
 	}
 	riddle.W = room.W
 	return &riddle

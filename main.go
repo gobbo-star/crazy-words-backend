@@ -35,8 +35,13 @@ func startServer() {
 }
 
 func serve(w http.ResponseWriter, r *http.Request) {
-	ws, _ := upgrader.Upgrade(w, r, nil)
-	room.join(ws)
+	ws, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	p := NewParticipant(ws)
+	room.join(p)
 	defer room.quit(ws)
 	defer ws.Close()
 

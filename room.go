@@ -12,7 +12,7 @@ import (
 type Room struct {
 	ticker       *time.Ticker
 	W            string
-	participants []*websocket.Conn
+	participants []*Participant
 }
 
 func (r *Room) start() {
@@ -23,8 +23,8 @@ func (r *Room) start() {
 	}
 }
 
-func (r *Room) join(ws *websocket.Conn) {
-	r.participants = append(r.participants, ws)
+func (r *Room) join(p *Participant) {
+	r.participants = append(r.participants, p)
 }
 
 func (r *Room) notify() {
@@ -34,8 +34,7 @@ func (r *Room) notify() {
 		if err != nil {
 			fmt.Println(err)
 		}
-		_ = p.WriteMessage(websocket.TextMessage,
-			rs)
+		p.Notify(rs)
 	}
 }
 
@@ -56,7 +55,7 @@ func NewRoom(refreshRate time.Duration) *Room {
 	rand.Seed(time.Now().UnixNano())
 	genWordsPool()
 	r.W = newWord(randLen())
-	r.participants = make([]*websocket.Conn, 0)
+	r.participants = make([]*Participant, 0)
 	r.ticker = time.NewTicker(refreshRate)
 	return &r
 }
