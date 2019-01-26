@@ -12,11 +12,12 @@ type Room struct {
 	ticker       *time.Ticker
 	W            string
 	participants []*Participant
+	wg           *WordGen
 }
 
 func (r *Room) start() {
 	for t := range r.ticker.C {
-		r.W = newWord(randLen())
+		r.W = r.wg.GenWord()
 		fmt.Println(t)
 		fmt.Println(r.W)
 	}
@@ -45,16 +46,17 @@ func (r *Room) quit(ws *websocket.Conn) {
 func (r *Room) guess(bytes []byte) bool {
 	success := r.W == string(bytes)
 	if success {
-		r.W = newWord(randLen())
+		r.W = r.wg.GenWord()
 	}
 	return success
 }
 
-func NewRoom(refreshRate time.Duration) *Room {
+func NewRoom(refreshRate time.Duration, gen *WordGen) *Room {
 	r := Room{}
 	rand.Seed(time.Now().UnixNano())
 	genWordsPool()
-	r.W = newWord(randLen())
+	r.wg = gen
+	r.W = r.wg.GenWord()
 	r.participants = make([]*Participant, 0)
 	r.ticker = time.NewTicker(refreshRate)
 	return &r

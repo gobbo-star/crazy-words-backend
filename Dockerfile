@@ -8,4 +8,4 @@ RUN go build -o main .
 FROM golang:latest
 RUN mkdir /app
 COPY --from=builder app/main /app/
-CMD ["/app/main"]
+CMD ["/app/main -words /dict/words"]

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/gorilla/websocket"
 	"log"
@@ -13,6 +14,7 @@ var refresher *time.Ticker
 var runeSet []rune
 var room *Room
 var nameGen *NameGen
+var wordGen *WordGen
 
 func main() {
 	startServer()
@@ -22,6 +24,9 @@ func startServer() {
 	fmt.Println("server is starting")
 	defer fmt.Println("server is stopped")
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+	wordsFile := flag.String("words", "SET DEFAULT VALUE to words", "foo")
+	flag.Parse()
+	wg := NewWordGen(*wordsFile)
 	nameGen = NewNameGen()
 	refresher = time.NewTicker(1 * time.Second)
 	go func() {
@@ -29,7 +34,7 @@ func startServer() {
 			room.notify()
 		}
 	}()
-	room = NewRoom(15 * time.Second)
+	room = NewRoom(15*time.Second, wg)
 	go room.start()
 	http.HandleFunc("/", serve)
 	log.Fatal(http.ListenAndServe(":8080", nil))
