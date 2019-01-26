@@ -11,7 +11,7 @@ import (
 
 type Room struct {
 	ticker       *time.Ticker
-	W            string `json:"w"`
+	W            string
 	participants []*websocket.Conn
 }
 
@@ -28,9 +28,9 @@ func (r *Room) join(ws *websocket.Conn) {
 }
 
 func (r *Room) notify() {
+	rs, err := json.Marshal(NewRiddle(r))
 	for i := 0; i < len(r.participants); i++ {
 		p := r.participants[i]
-		rs, err := json.Marshal(room)
 		if err != nil {
 			fmt.Println(err)
 		}

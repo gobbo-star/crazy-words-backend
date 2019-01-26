@@ -49,18 +49,10 @@ func serve(w http.ResponseWriter, r *http.Request) {
 		var resp []byte
 		switch string(message) {
 		case "HINT":
-			//resp = []byte(word)
-		case "CONNECT":
-			//resp = []byte(fmt.Sprintf("new: %v", len(word)))
+			resp = []byte(room.W)
 		case "EXIT":
 			break
 		default:
-			//if word == string(message) {
-			//	word = newWord(randLen())
-			//	resp = []byte(fmt.Sprintf("%v is right. new: %v", string(message), len(word)))
-			//} else {
-			//	resp = []byte("wrong")
-			//}
 		}
 		err = ws.WriteMessage(websocket.TextMessage, resp)
 		if err != nil {
