@@ -42,11 +42,12 @@ func (r *Room) quit(ws *websocket.Conn) {
 	//ws.
 }
 
-func (r *Room) guess(bytes []byte) {
-	if r.W != string(bytes) {
-		return
+func (r *Room) guess(bytes []byte) bool {
+	success := r.W == string(bytes)
+	if success {
+		r.W = newWord(randLen())
 	}
-	r.W = newWord(randLen())
+	return success
 }
 
 func NewRoom(refreshRate time.Duration) *Room {

@@ -59,7 +59,10 @@ func serve(w http.ResponseWriter, r *http.Request) {
 		case "EXIT":
 			break
 		default:
-			room.guess(message)
+			suc := room.guess(message)
+			if suc {
+				p.Score++
+			}
 		}
 		err = ws.WriteMessage(websocket.TextMessage, resp)
 		if err != nil {
