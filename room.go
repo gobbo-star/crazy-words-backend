@@ -44,6 +44,13 @@ func (r *Room) quit(ws *websocket.Conn) {
 	//ws.
 }
 
+func (r *Room) guess(bytes []byte) {
+	if r.W != string(bytes) {
+		return
+	}
+	r.W = newWord(randLen())
+}
+
 func NewRoom(refreshRate time.Duration) *Room {
 	r := Room{}
 	rand.Seed(time.Now().UnixNano())
