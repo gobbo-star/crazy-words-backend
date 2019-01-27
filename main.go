@@ -45,8 +45,8 @@ func initGens() {
 	flag.Parse()
 	wordGen = NewWordGen(*wordsFile)
 	colorGen = NewColorGen(*colorsFile)
-	nameGen = NewNameGen(colorGen)
 	animalGen = NewAnimalGen(*animalsFile)
+	nameGen = NewNameGen(colorGen, animalGen)
 }
 
 func serve(w http.ResponseWriter, r *http.Request) {

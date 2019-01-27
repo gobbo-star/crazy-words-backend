@@ -13,6 +13,10 @@ type AnimalGen struct {
 	animals []string
 }
 
+func (ag AnimalGen) GenAnimal() string {
+	return ag.animals[ag.rnd.Intn(len(ag.animals))]
+}
+
 func NewAnimalGen(file string) *AnimalGen {
 	ag := AnimalGen{}
 	ag.rnd = rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -23,7 +27,8 @@ func NewAnimalGen(file string) *AnimalGen {
 	lines := strings.Split(string(content), "\n")
 	ag.animals = make([]string, len(lines))
 	for i := 0; i < len(lines); i++ {
-		ag.animals[i] = lines[0]
+		ls := strings.Split(lines[i], "\t")
+		ag.animals[i] = ls[0]
 	}
 	return &ag
 }
