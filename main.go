@@ -46,7 +46,7 @@ func initGens() {
 	wordGen = NewWordGen(*wordsFile)
 	colorGen = NewColorGen(*colorsFile)
 	nameGen = NewNameGen(colorGen)
-	animalGen = NewAnimalGen(animalsFile)
+	animalGen = NewAnimalGen(*animalsFile)
 }
 
 func serve(w http.ResponseWriter, r *http.Request) {

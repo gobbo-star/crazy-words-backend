@@ -9,4 +9,5 @@ FROM golang:latest
 RUN mkdir /app
 COPY --from=builder app/main /app/
 COPY --from=builder app/list-of-colors /app/
-CMD ["/app/main", "-words", "/dict/words", "-colors", "list-of-colors"]
+COPY --from=builder app/animals-list /app/
+CMD ["/app/main", "-words", "/dict/words", "-colors", "list-of-colors", "-animals", "animals-list"]
