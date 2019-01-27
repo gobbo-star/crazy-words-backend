@@ -25,9 +25,10 @@ func startServer() {
 	defer fmt.Println("server is stopped")
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 	wordsFile := flag.String("words", "SET DEFAULT VALUE to words", "foo")
+	colorsFile := flag.String("colors", "SET DEFAULT VALUE to colors", "foo")
 	flag.Parse()
 	wg := NewWordGen(*wordsFile)
-	nameGen = NewNameGen()
+	nameGen = NewNameGen(*colorsFile)
 	refresher = time.NewTicker(1 * time.Second)
 	go func() {
 		for range refresher.C {

@@ -8,5 +8,5 @@ RUN go build -o main .
 FROM golang:latest
 RUN mkdir /app
 COPY --from=builder app/main /app/
-COPY --from=builder app/main /app/
-CMD ["/app/main", "-words", "/dict/words"]
+COPY --from=builder app/list-of-colors /app/
+CMD ["/app/main", "-words", "/dict/words", "-colors", "list-of-colors"]
