@@ -1,35 +1,22 @@
 package main
 
 import (
-	"fmt"
-	"io/ioutil"
-	"strings"
+	"math/rand"
+	"time"
 )
 
 type NameGen struct {
-	colors []Color
+	rnd *rand.Rand
+	cg  *ColorGen
 }
 
-type Color struct {
-	code string
-	name string
-}
-
-func NewNameGen(file string) *NameGen {
+func NewNameGen(cg *ColorGen) *NameGen {
 	ng := NameGen{}
-	content, err := ioutil.ReadFile(file)
-	if err != nil {
-		fmt.Println(err)
-	}
-	lines := strings.Split(string(content), "\n")
-	ng.colors = make([]Color, len(lines))
-	for i := 0; i < len(lines); i++ {
-		ls := strings.Split(lines[i], "\t")
-		ng.colors = append(ng.colors, Color{ls[0], ls[1]})
-	}
+	ng.rnd = rand.New(rand.NewSource(time.Now().UnixNano()))
+	ng.cg = cg
 	return &ng
 }
 
 func (ng *NameGen) GenName() string {
-	return newWordRandLen()
+	return ng.cg.GenColor().name
 }

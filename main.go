@@ -15,6 +15,7 @@ var runeSet []rune
 var room *Room
 var nameGen *NameGen
 var wordGen *WordGen
+var colorGen *ColorGen
 
 func main() {
 	startServer()
@@ -24,21 +25,26 @@ func startServer() {
 	fmt.Println("server is starting")
 	defer fmt.Println("server is stopped")
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
-	wordsFile := flag.String("words", "SET DEFAULT VALUE to words", "foo")
-	colorsFile := flag.String("colors", "SET DEFAULT VALUE to colors", "foo")
-	flag.Parse()
-	wg := NewWordGen(*wordsFile)
-	nameGen = NewNameGen(*colorsFile)
+	initGens()
 	refresher = time.NewTicker(1 * time.Second)
 	go func() {
 		for range refresher.C {
 			room.notify()
 		}
 	}()
-	room = NewRoom(15*time.Second, wg)
+	room = NewRoom(15*time.Second, wordGen)
 	go room.start()
 	http.HandleFunc("/", serve)
 	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+func initGens() {
+	wordsFile := flag.String("words", "SET DEFAULT VALUE to words", "foo")
+	colorsFile := flag.String("colors", "SET DEFAULT VALUE to colors", "foo")
+	flag.Parse()
+	wordGen = NewWordGen(*wordsFile)
+	colorGen = NewColorGen(*colorsFile)
+	nameGen = NewNameGen(colorGen)
 }
 
 func serve(w http.ResponseWriter, r *http.Request) {
@@ -47,7 +53,9 @@ func serve(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 		return
 	}
-	p := NewParticipant(ws, nameGen.GenName())
+	p := NewParticipant(
+		ws,
+		nameGen.GenName())
 	room.join(p)
 	defer room.quit(ws)
 	defer ws.Close()
