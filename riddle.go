@@ -1,9 +1,9 @@
 package main
 
 type Riddle struct {
-	C int            `json:"chars"`
-	P []*Participant `json:"participants"`
-	W string         `json:"word"` // TODO
+	C int                     `json:"chars"`
+	P map[string]*Participant `json:"participants"`
+	W string                  `json:"word"` // TODO
 }
 
 func NewRiddle(r *Room) *Riddle {

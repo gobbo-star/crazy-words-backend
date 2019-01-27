@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/websocket"
 	"math/rand"
 	"time"
 )
@@ -11,7 +10,7 @@ import (
 type Room struct {
 	ticker       *time.Ticker
 	W            string
-	participants []*Participant
+	participants map[string]*Participant
 	wg           *WordGen
 }
 
@@ -24,13 +23,12 @@ func (r *Room) start() {
 }
 
 func (r *Room) join(p *Participant) {
-	r.participants = append(r.participants, p)
+	r.participants[p.Name] = p
 }
 
 func (r *Room) notify() {
 	rs, err := json.Marshal(NewRiddle(r))
-	for i := 0; i < len(r.participants); i++ {
-		p := r.participants[i]
+	for _, p := range r.participants {
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -38,9 +36,8 @@ func (r *Room) notify() {
 	}
 }
 
-func (r *Room) quit(ws *websocket.Conn) {
-	// TODO
-	//ws.
+func (r *Room) quit(p *Participant) {
+	delete(r.participants, p.Name)
 }
 
 func (r *Room) guess(bytes []byte) bool {
@@ -57,7 +54,7 @@ func NewRoom(refreshRate time.Duration, gen *WordGen) *Room {
 	genWordsPool()
 	r.wg = gen
 	r.W = r.wg.GenWord()
-	r.participants = make([]*Participant, 0)
+	r.participants = map[string]*Participant{}
 	r.ticker = time.NewTicker(refreshRate)
 	return &r
 }

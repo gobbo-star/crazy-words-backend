@@ -59,9 +59,6 @@ func serve(w http.ResponseWriter, r *http.Request) {
 		ws,
 		nameGen.GenName())
 	room.join(p)
-	defer room.quit(ws)
-	defer ws.Close()
-
 	for {
 		_, message, err := ws.ReadMessage()
 		if err != nil {
@@ -73,11 +70,23 @@ func serve(w http.ResponseWriter, r *http.Request) {
 		case "HINT":
 			resp = []byte(room.W)
 		case "EXIT":
+			room.quit(p)
+			ws.Close()
 			break
 		default:
 			suc := room.guess(message)
 			if suc {
 				p.Score++
+			}
+		}
+		if ce, ok := err.(*websocket.CloseError); ok {
+			switch ce.Code {
+			case websocket.CloseNormalClosure,
+				websocket.CloseGoingAway,
+				websocket.CloseNoStatusReceived:
+				fmt.Println("Web socket closed by client: %s", err)
+				room.quit(p)
+				return
 			}
 		}
 		err = ws.WriteMessage(websocket.TextMessage, resp)
