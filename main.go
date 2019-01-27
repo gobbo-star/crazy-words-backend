@@ -11,11 +11,11 @@ import (
 
 var upgrader = websocket.Upgrader{}
 var refresher *time.Ticker
-var runeSet []rune
 var room *Room
 var nameGen *NameGen
 var wordGen *WordGen
 var colorGen *ColorGen
+var animalGen *AnimalGen
 
 func main() {
 	startServer()
@@ -41,10 +41,12 @@ func startServer() {
 func initGens() {
 	wordsFile := flag.String("words", "SET DEFAULT VALUE to words", "foo")
 	colorsFile := flag.String("colors", "SET DEFAULT VALUE to colors", "foo")
+	animalsFile := flag.String("animals", "SET DEFAULT VALUE to animals", "foo")
 	flag.Parse()
 	wordGen = NewWordGen(*wordsFile)
 	colorGen = NewColorGen(*colorsFile)
 	nameGen = NewNameGen(colorGen)
+	animalGen = NewAnimalGen(animalsFile)
 }
 
 func serve(w http.ResponseWriter, r *http.Request) {

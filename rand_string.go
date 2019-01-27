@@ -5,6 +5,8 @@ import (
 	"strings"
 )
 
+var runeSet []rune
+
 func randLen() int {
 	return rand.Intn(5) + 3
 }
