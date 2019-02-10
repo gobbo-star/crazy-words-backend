@@ -7,5 +7,5 @@ PREV_TAG=crw-$PREV_VER
 CUR_TAG=crw-$CUR_VER
 docker ps | grep crw | awk '{print $1}' | xargs docker stop
 docker build --tag=$CUR_TAG --tag=crw:latest .
-docker run -v /usr/share/dict:/dict -p 8099:8080 -d crw /app/main -words /dict/words -colors list-of-colors -animals animals-list
+docker run -v /usr/share/dict:/dict -p 8099:8080 -d crw /app/main -words /dict/words -colors /app/list-of-colors -animals /app/animals-list
 export CRW_TAG_VERSION=$CUR_VER
