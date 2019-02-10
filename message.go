@@ -8,7 +8,13 @@ const (
 	CHAT
 )
 
+var MsgTypes = map[MsgType]string{
+	STATE: "STATE",
+	GUESS: "GUESS",
+	CHAT:  "CHAT",
+}
+
 type Message struct {
 	Payload interface{} `json:"Payload"`
-	Type    MsgType
+	Type    string      `json:"Type"`
 }

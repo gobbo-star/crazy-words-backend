@@ -30,7 +30,7 @@ func (r *Room) Join(p *Participant) {
 func (r *Room) Notify() {
 	rs, err := json.Marshal(
 		Message{
-			Type:    STATE,
+			Type:    MsgTypes[STATE],
 			Payload: NewRiddle(r),
 		})
 	for _, p := range r.participants {
