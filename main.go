@@ -59,20 +59,23 @@ func serve(w http.ResponseWriter, r *http.Request) {
 		ws,
 		nameGen.GenName())
 	room.join(p)
+	go readPump(ws, p)
+}
+
+func readPump(ws *websocket.Conn, p *Participant) {
+READ:
 	for {
 		_, message, err := ws.ReadMessage()
 		if err != nil {
 			log.Println("read:", err)
-			break
+			break READ
 		}
 		var resp []byte
 		switch string(message) {
 		case "HINT":
 			resp = []byte(room.W)
 		case "EXIT":
-			room.quit(p)
-			ws.Close()
-			break
+			break READ
 		default:
 			suc := room.guess(message)
 			if suc {
@@ -95,4 +98,6 @@ func serve(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
+	room.quit(p)
+	ws.Close()
 }
