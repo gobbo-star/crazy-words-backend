@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 #/etc/crwords/crazy-words-backend/Dockerfile
 git pull
 PREV_VER=$CRW_TAG_VERSION
