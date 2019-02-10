@@ -29,11 +29,11 @@ func startServer() {
 	refresher = time.NewTicker(1 * time.Second)
 	go func() {
 		for range refresher.C {
-			room.notify()
+			room.Notify()
 		}
 	}()
-	room = NewRoom(15*time.Second, wordGen)
-	go room.start()
+	room = NewRoom(15*time.Second, wordGen, 3)
+	go room.Start()
 	http.HandleFunc("/", serve)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
@@ -58,7 +58,7 @@ func serve(w http.ResponseWriter, r *http.Request) {
 	p := NewParticipant(
 		ws,
 		nameGen.GenName())
-	room.join(p)
+	room.Join(p)
 	go readPump(ws, p)
 }
 
@@ -77,9 +77,14 @@ READ:
 		case "EXIT":
 			break READ
 		default:
-			suc := room.guess(message)
+			suc := room.Guess(message)
 			if suc {
 				p.Score++
+				if room.MaxScoreReached(p.Score) {
+					room.NewGame()
+					p.Wins++
+				}
+				room.NewWord()
 			}
 		}
 		if ce, ok := err.(*websocket.CloseError); ok {
@@ -87,17 +92,18 @@ READ:
 			case websocket.CloseNormalClosure,
 				websocket.CloseGoingAway,
 				websocket.CloseNoStatusReceived:
-				fmt.Println("Web socket closed by client: %s", err)
-				room.quit(p)
-				return
+				break READ
 			}
 		}
 		err = ws.WriteMessage(websocket.TextMessage, resp)
 		if err != nil {
 			log.Println(err)
-			break
+			break READ
 		}
 	}
-	room.quit(p)
-	ws.Close()
+	room.Quit(p)
+	err := ws.Close()
+	if err != nil {
+		log.Println(err)
+	}
 }

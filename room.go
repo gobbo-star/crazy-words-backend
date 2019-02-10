@@ -12,9 +12,10 @@ type Room struct {
 	W            string
 	participants map[string]*Participant
 	wg           *WordGen
+	scoreLimit   uint
 }
 
-func (r *Room) start() {
+func (r *Room) Start() {
 	for t := range r.ticker.C {
 		r.W = r.wg.GenWord()
 		fmt.Println(t)
@@ -22,11 +23,11 @@ func (r *Room) start() {
 	}
 }
 
-func (r *Room) join(p *Participant) {
+func (r *Room) Join(p *Participant) {
 	r.participants[p.Name] = p
 }
 
-func (r *Room) notify() {
+func (r *Room) Notify() {
 	rs, err := json.Marshal(NewRiddle(r))
 	for _, p := range r.participants {
 		if err != nil {
@@ -36,19 +37,30 @@ func (r *Room) notify() {
 	}
 }
 
-func (r *Room) quit(p *Participant) {
+func (r *Room) Quit(p *Participant) {
 	delete(r.participants, p.Name)
 }
 
-func (r *Room) guess(bytes []byte) bool {
+func (r *Room) Guess(bytes []byte) bool {
 	success := r.W == string(bytes)
-	if success {
-		r.W = r.wg.GenWord()
-	}
 	return success
 }
 
-func NewRoom(refreshRate time.Duration, gen *WordGen) *Room {
+func (r *Room) NewWord() {
+	r.W = r.wg.GenWord()
+}
+
+func (r *Room) MaxScoreReached(score uint) bool {
+	return score >= r.scoreLimit
+}
+
+func (r *Room) NewGame() {
+	for _, p := range r.participants {
+		p.Score = 0
+	}
+}
+
+func NewRoom(refreshRate time.Duration, gen *WordGen, scoreLimit uint) *Room {
 	r := Room{}
 	rand.Seed(time.Now().UnixNano())
 	genWordsPool()
@@ -56,5 +68,6 @@ func NewRoom(refreshRate time.Duration, gen *WordGen) *Room {
 	r.W = r.wg.GenWord()
 	r.participants = map[string]*Participant{}
 	r.ticker = time.NewTicker(refreshRate)
+	r.scoreLimit = scoreLimit
 	return &r
 }
