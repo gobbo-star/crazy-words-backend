@@ -72,8 +72,6 @@ READ:
 		}
 		var resp []byte
 		switch string(message) {
-		case "HINT":
-			resp = []byte(room.W)
 		case "EXIT":
 			break READ
 		default:

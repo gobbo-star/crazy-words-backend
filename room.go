@@ -28,7 +28,11 @@ func (r *Room) Join(p *Participant) {
 }
 
 func (r *Room) Notify() {
-	rs, err := json.Marshal(NewRiddle(r))
+	rs, err := json.Marshal(
+		Message{
+			Type:    STATE,
+			Payload: NewRiddle(r),
+		})
 	for _, p := range r.participants {
 		if err != nil {
 			fmt.Println(err)
